@@ -10,7 +10,7 @@ import { markMessagesAsRead } from "./services/message.service.ts";
 const app: Express = express();
 
 const corsOptions = {
-  origin: process.env.CLIENT_URL || "http://localhost:3000",
+  origin: process.env.CLIENT_URL || "https://lumochat.manishchavan.in" || "http://localhost:3000",
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH"],
 };
