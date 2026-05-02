@@ -11,7 +11,7 @@ The Node.js/TypeScript API server for LumoChat. Handles authentication, connecti
 | Framework | Express 5 |
 | Real-time | Socket.io |
 | Database | PostgreSQL (via `pg` Pool) |
-| Auth | JWT (cookie-based) + Google OAuth 2.0 |
+| Auth | JWT (cookie + localStorage) |
 | File uploads | Multer (local staging) → Cloudinary |
 | Image processing | Sharp (compression before upload) |
 | Password hashing | bcryptjs |
@@ -50,8 +50,7 @@ src/
 │   └── express.d.ts            # Augments Express Request with req.user
 └── utils/
     ├── asyncHandler.ts          # Wraps async controllers to forward errors
-    ├── responses.ts             # ApiResponse / ApiError helpers
-    └── constants.ts             # authTypeConstant (EMAIL | GOOGLE)
+    └── responses.ts             # ApiResponse / ApiError helpers
 ```
 
 ## API Reference
@@ -65,7 +64,6 @@ All authenticated routes require a valid `token` cookie (set at login).
 | POST | `/signup` | No | Register with email + password |
 | POST | `/signin` | No | Login with email + password |
 | GET | `/signout` | No | Clear auth cookie |
-| POST | `/google` | No | Login / register via Google ID token |
 
 ### User — `/api/user`
 
@@ -98,9 +96,7 @@ A *connection* is a two-way relationship (like a contact/friend). It begins as a
 ## How It Was Built
 
 ### Authentication Flow
-Register and login endpoints hash passwords with `bcryptjs` (salt rounds: 10) and issue a JWT signed with `JWT_SECRET`. The token is sent as an HTTP cookie. Every protected route runs `checkLogin` middleware which reads the cookie, verifies the JWT, and attaches the decoded user to `req.user`.
-
-Google OAuth uses `google-auth-library`'s `OAuth2Client.verifyIdToken()`. If the Google account email is new, a user record is created automatically; otherwise the existing user is returned and a fresh JWT is issued.
+Register and login endpoints hash passwords with `bcryptjs` (salt rounds: 10) and issue a JWT signed with `JWT_SECRET`. The token is sent as both an HTTP-only cookie (for REST API requests) and in the response body (for the client to store in `localStorage` for socket auth). Every protected route runs `checkLogin` middleware which reads the cookie, verifies the JWT, and attaches the decoded user to `req.user`.
 
 ### Database
 PostgreSQL is accessed directly with the `pg` Pool — no ORM. All queries live in the `services/` layer. The pool is initialised from `DATABASE_URL` in `.env`.
@@ -126,7 +122,6 @@ Multer stages the uploaded file to the local `uploads/` directory. For images, `
 - Node.js 18+
 - PostgreSQL database
 - Cloudinary account (for media uploads)
-- Google Cloud project with OAuth credentials (for Google Sign-In)
 
 ### Install & run
 
@@ -149,9 +144,6 @@ CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
 
-# Google OAuth
-GOOGLE_CLIENT_ID=
-
 # Frontend origin for CORS
 CLIENT_URL=http://localhost:3000
 ```
@@ -171,7 +163,6 @@ socket.io           # WebSocket server
 pg                  # PostgreSQL client
 jsonwebtoken        # JWT sign/verify
 bcryptjs            # Password hashing
-google-auth-library # Google OAuth token verification
 cloudinary          # Cloud media storage
 multer              # Multipart file upload
 sharp               # Image compression

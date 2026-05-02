@@ -1,4 +1,4 @@
-import express, { type Request, type Response, type Express } from "express";
+import express, { type Express } from "express";
 import morgan from "morgan";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -13,7 +13,6 @@ const corsOptions = {
   origin: process.env.CLIENT_URL || "http://localhost:3000",
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH"],
-  allowedHeaders: ["Content-Type"],
 };
 
 // socket connection
