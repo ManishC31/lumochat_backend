@@ -17,7 +17,13 @@ export const registerUserController = asyncHandler(async (req: Request, res: Res
   const user = await createUser({ email, name, password: encPassword });
   const token = await generateToken({ id: user.id, email: user.email });
 
-  res.cookie("token", token);
+  const isProduction = process.env.NODE_ENV === "production";
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
   ApiResponse(res, 201, "User created successfully", {
     user: { id: user.id, name: user.name, email: user.email },
     token: token,
@@ -40,7 +46,13 @@ export const loginUserController = asyncHandler(async (req: Request, res: Respon
   }
 
   const token = await generateToken({ id: user.id, email: user.email });
-  res.cookie("token", token);
+  const isProduction = process.env.NODE_ENV === "production";
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
 
   ApiResponse(res, 200, "User logged in successfully", {
     user: { id: user.id, name: user.name, email: user.email },
@@ -49,6 +61,11 @@ export const loginUserController = asyncHandler(async (req: Request, res: Respon
 });
 
 export const logoutUserController = asyncHandler(async (req: Request, res: Response) => {
-  res.clearCookie("token");
+  const isProduction = process.env.NODE_ENV === "production";
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+  });
   ApiResponse(res, 200, "User logged out successfully");
 });
