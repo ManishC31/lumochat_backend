@@ -6,7 +6,10 @@ import { ApiError, ApiResponse } from "../utils/responses.ts";
 import path from "path";
 
 export const getLoggedInUserController = asyncHandler(async (req: Request, res: Response) => {
-  return ApiResponse(res, 200, "User fetched successfully", req.user);
+  return ApiResponse(res, 200, "User fetched successfully", {
+    user: req.user,
+    token: req.cookies?.token ?? null,
+  });
 });
 
 export const updateUserController = asyncHandler(async (req: Request, res: Response) => {
