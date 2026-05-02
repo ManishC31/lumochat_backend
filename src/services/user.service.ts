@@ -40,14 +40,26 @@ export const getPasswordOfUser = async (userId: number) => {
   }
 };
 
-export const createUser = async ({ email, name, password, authType }: NewUserInput) => {
+export const createUser = async ({ email, name, password }: NewUserInput) => {
   const client = await pool.connect();
   try {
-    const query = `insert into users (name, email, password, auth_type ) values ($1, $2, $3, $4) returning *`;
-    const { rows } = await client.query(query, [name, email, password, authType]);
+    const query = `insert into users (name, email, password) values ($1, $2, $3) returning *`;
+    const { rows } = await client.query(query, [name, email, password]);
     return rows[0];
   } catch (error) {
     console.error("createUser err:", error);
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+export const updateUserImage = async (userId: number, imageUrl: string) => {
+  const client = await pool.connect();
+  try {
+    await client.query(`UPDATE users SET image = $1 WHERE id = $2`, [imageUrl, userId]);
+  } catch (error) {
+    console.error("updateUserImage err:", error);
     throw error;
   } finally {
     client.release();

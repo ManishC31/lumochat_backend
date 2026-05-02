@@ -5,13 +5,14 @@ import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
 import http from "http";
 import { socketMiddleware } from "./middlewares/socket.middleware.ts";
+import { markMessagesAsRead } from "./services/message.service.ts";
 
 const app: Express = express();
 
 const corsOptions = {
   origin: process.env.CLIENT_URL || "http://localhost:3000",
   credentials: true,
-  methods: ["GET", "POST", "PUT"],
+  methods: ["GET", "POST", "PUT", "PATCH"],
   allowedHeaders: ["Content-Type"],
 };
 
@@ -58,6 +59,19 @@ io.on("connection", (socket) => {
     const receiverSocketId = getReceiverSocketId(receiverId);
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("stop_typing", { senderId: userId });
+    }
+  });
+
+  // Receiver tells us they've read messages; mark DB + notify sender
+  socket.on("markRead", async ({ connectionId, senderId }: { connectionId: string; senderId: string }) => {
+    try {
+      await markMessagesAsRead(Number(connectionId), Number(userId));
+      const senderSocketId = getReceiverSocketId(senderId);
+      if (senderSocketId) {
+        io.to(senderSocketId).emit("messagesRead", { connectionId });
+      }
+    } catch (err) {
+      console.error("markRead err:", err);
     }
   });
 

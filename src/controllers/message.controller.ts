@@ -2,7 +2,7 @@ import asyncHandler from "../utils/asyncHandler.ts";
 import { type Request, type Response } from "express";
 import { ApiError, ApiResponse } from "../utils/responses.ts";
 import { compressImage, uploadImage } from "../services/imageUpload.service.ts";
-import { createMessage, getMediaOfConnection, getMessagesOfConnection } from "../services/message.service.ts";
+import { createMessage, getMediaOfConnection, getMessagesOfConnection, markMessagesAsRead } from "../services/message.service.ts";
 import { io, getReceiverSocketId } from "../app.ts";
 import path from "path";
 
@@ -50,6 +50,18 @@ export const getMessagesController = asyncHandler(async (req: Request, res: Resp
   }
 
   const messages = await getMessagesOfConnection(connectionId, offset, limit);
+
+  // Mark messages received by the current user as read and notify the sender(s)
+  const senderIds = await markMessagesAsRead(connectionId, req.user!.id);
+  if (senderIds.length > 0) {
+    const unique = [...new Set(senderIds.map(String))];
+    for (const senderId of unique) {
+      const senderSocketId = getReceiverSocketId(senderId);
+      if (senderSocketId) {
+        io.to(senderSocketId).emit("messagesRead", { connectionId });
+      }
+    }
+  }
 
   return ApiResponse(res, 200, "Messages fetched successfully", messages);
 });

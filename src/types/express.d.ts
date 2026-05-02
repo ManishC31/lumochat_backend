@@ -7,6 +7,7 @@ declare module "express-serve-static-core" {
       id: number;
       name: string;
       email: string;
+      image?: string;
     };
   }
 }

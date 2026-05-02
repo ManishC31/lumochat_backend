@@ -14,6 +14,22 @@ export const getMessagesOfConnection = async (connectionId: number, offset: numb
   }
 };
 
+export const markMessagesAsRead = async (connectionId: number, receiverId: number): Promise<number[]> => {
+  const client = await pool.connect();
+  try {
+    const { rows } = await client.query(
+      `UPDATE messages SET is_read = true WHERE connection_id = $1 AND receiver_id = $2 AND is_read = false RETURNING sender_id`,
+      [connectionId, receiverId],
+    );
+    return rows.map((r: any) => r.sender_id);
+  } catch (error) {
+    console.error("markMessagesAsRead err:", error);
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
 export const getMediaOfConnection = async (connectionId: number) => {
   const client = await pool.connect();
   try {

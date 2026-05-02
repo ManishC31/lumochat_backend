@@ -32,6 +32,7 @@ export const checkLogin = async (req: Request, res: Response, next: NextFunction
       id: user.id,
       name: user.name,
       email: user.email,
+      image: user.image,
     };
 
     next();
