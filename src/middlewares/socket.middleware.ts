@@ -13,8 +13,6 @@ export const socketMiddleware = async (socket: Socket, next: (err?: ExtendedErro
         ?.split("=")[1] ||
       (typeof socket.handshake.headers.authorization === "string" ? socket.handshake.headers.authorization.replace("Bearer ", "") : undefined);
 
-    console.log("socket token:", token);
-
     if (!token) {
       console.log("Socket connection rejected: No token provided");
       return next(new Error("Unauthorized - No token"));

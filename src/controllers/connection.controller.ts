@@ -47,7 +47,6 @@ export const getConnectionRequestController = asyncHandler(async (req: Request, 
 
 export const acceptConnectionRequestController = asyncHandler(async (req: Request, res: Response) => {
   const connectionId = Number(req.params.id);
-  console.log("connectionId", connectionId);
 
   if (!connectionId || isNaN(connectionId)) {
     return ApiError(res, 400, "Connection id is required");

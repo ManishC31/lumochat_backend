@@ -32,7 +32,6 @@ app.use(cors(corsOptions));
 
 // store online users
 const userSocketMap: Record<string, string> = {};
-console.log("user socket map:", userSocketMap);
 
 export function getReceiverSocketId(userId: string) {
   return userSocketMap[userId];
