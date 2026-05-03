@@ -5,6 +5,27 @@ import { ApiError, ApiResponse } from "../utils/responses.js";
 import { encryptPassword, generateToken, verifyPassword } from "../services/auth.service.js";
 
 export const registerUserController = asyncHandler(async (req: Request, res: Response) => {
+  /*
+    #swagger.tags = ['Auth']
+    #swagger.summary = 'Register a new user'
+    #swagger.description = 'Creates a new user account and sets an auth cookie.'
+    #swagger.requestBody = {
+      required: true,
+      content: {
+        'application/json': {
+          schema: { $ref: '#/components/schemas/SignupBody' }
+        }
+      }
+    }
+    #swagger.responses[201] = {
+      description: 'User created successfully',
+      content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiResponse' } } }
+    }
+    #swagger.responses[400] = {
+      description: 'User already exists with that email',
+      content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } }
+    }
+  */
   const { name, email, password } = req.body;
 
   const existingUser = await getUserByEmail(email);
@@ -31,6 +52,27 @@ export const registerUserController = asyncHandler(async (req: Request, res: Res
 });
 
 export const loginUserController = asyncHandler(async (req: Request, res: Response) => {
+  /*
+    #swagger.tags = ['Auth']
+    #swagger.summary = 'Sign in'
+    #swagger.description = 'Authenticates a user and sets an auth cookie.'
+    #swagger.requestBody = {
+      required: true,
+      content: {
+        'application/json': {
+          schema: { $ref: '#/components/schemas/SigninBody' }
+        }
+      }
+    }
+    #swagger.responses[200] = {
+      description: 'User logged in successfully',
+      content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiResponse' } } }
+    }
+    #swagger.responses[400] = {
+      description: 'Invalid credentials',
+      content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } }
+    }
+  */
   const { email, password } = req.body;
 
   const user = await getUserByEmail(email);
@@ -61,6 +103,16 @@ export const loginUserController = asyncHandler(async (req: Request, res: Respon
 });
 
 export const logoutUserController = asyncHandler(async (req: Request, res: Response) => {
+  /*
+    #swagger.tags = ['Auth']
+    #swagger.summary = 'Sign out'
+    #swagger.description = 'Clears the auth cookie and logs out the current user.'
+    #swagger.security = [{ cookieAuth: [] }]
+    #swagger.responses[200] = {
+      description: 'User logged out successfully',
+      content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiResponse' } } }
+    }
+  */
   const isProduction = process.env.NODE_ENV === "production";
   res.clearCookie("token", {
     httpOnly: true,
