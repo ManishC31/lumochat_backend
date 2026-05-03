@@ -31,8 +31,8 @@ export const createConnectionController = asyncHandler(async (req: Request, res:
 
   const user = await getUserByEmail(email);
 
-  if (Number(req.user!.id) === Number(user.id)) {
-    return ApiError(res, 400, "Invalid connection request");
+  if (!user) {
+    return ApiError(res, 400, "No user found with email");
   }
 
   await createConnectionRequest(req.user!.id, user.id);

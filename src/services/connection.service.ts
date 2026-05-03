@@ -23,6 +23,7 @@ export const getConnectionsOfUser = async (userId: number) => {
         limit 1
       ) last_msg on true
       where (c.first_user = $1 or c.second_user = $1)
+      and c.is_accepted = true
       order by last_msg.created_at desc nulls last
     `;
     const { rows } = await client.query(query, [userId]);
